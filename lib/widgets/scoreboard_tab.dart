@@ -80,7 +80,35 @@ class _ScoreboardTabState extends State<ScoreboardTab> {
                       ),
                       direction: DismissDirection.endToStart,
                       key: Key(user.name),
-                      onDismissed: (direction) {
+                      confirmDismiss: (direction) async {
+                        final bool? confirm = await showDialog<bool>(
+                          context: context,
+                          builder: (BuildContext context) {
+                            final userName = widget.users[index].name;
+                            return AlertDialog(
+                              title: const Text('Delete user'),
+                              content: Text(
+                                'Are you sure you want to delete $userName? This action cannot be undone.',
+                              ),
+                              actions: <Widget>[
+                                TextButton(
+                                  onPressed: () =>
+                                      Navigator.pop(context, false),
+                                  child: const Text('Cancel'),
+                                ),
+                                FilledButton(
+                                  onPressed: () => Navigator.pop(context, true),
+                                  child: const Text('Delete'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+
+                        return confirm ?? false;
+                      },
+                      onDismissed: (direction) async {
+                        
                         setState(() {
                           widget.users.removeAt(index);
                         });
