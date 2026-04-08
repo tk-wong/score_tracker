@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 
 import '../models/score_history_entry.dart';
@@ -31,7 +33,7 @@ class _ScoreHomePageState extends State<ScoreHomePage>
     ScoreReason(label: 'Rule violation', delta: -10),
   ];
 
-  final List<ScoreHistoryEntry> _history = <ScoreHistoryEntry>[];
+  final Queue<ScoreHistoryEntry> _history = ListQueue<ScoreHistoryEntry>();
 
   @override
   void initState() {
@@ -124,8 +126,7 @@ class _ScoreHomePageState extends State<ScoreHomePage>
 
     setState(() {
       user.score += result.delta;
-      _history.insert(
-        0,
+      _history.addFirst(
         ScoreHistoryEntry(
           userName: user.name,
           delta: result.delta,
@@ -135,6 +136,48 @@ class _ScoreHomePageState extends State<ScoreHomePage>
       );
     });
   }
+
+    Future<void> _resetScores() async {
+    final bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Reset all scores'),
+          content: const Text('Are you sure you want to reset all scores to zero? This action cannot be undone.'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Reset'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirm != true) {
+      return;
+    }
+
+    setState(() {
+      for (final ScoreUser user in _users) {
+        final int oldScore = user.score;
+        user.score = 0;
+        _history.addFirst(
+          ScoreHistoryEntry(
+            userName: user.name,
+            delta: -oldScore,
+            reason: 'Score reset',
+            timestamp: DateTime.now(),
+          ),
+        );
+      }
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -157,6 +200,7 @@ class _ScoreHomePageState extends State<ScoreHomePage>
             onAddUser: _promptAddUser,
             onAddScore: (ScoreUser user) => _changeScore(user, true),
             onSubtractScore: (ScoreUser user) => _changeScore(user, false),
+            onResetScore: _resetScores,
           ),
           HistoryTab(history: _history),
         ],

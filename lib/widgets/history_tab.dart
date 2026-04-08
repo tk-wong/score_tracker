@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 
 import '../models/score_history_entry.dart';
@@ -5,7 +7,7 @@ import '../models/score_history_entry.dart';
 class HistoryTab extends StatelessWidget {
   const HistoryTab({super.key, required this.history});
 
-  final List<ScoreHistoryEntry> history;
+  final Queue<ScoreHistoryEntry> history;
 
   String _formatDate(DateTime dateTime) {
     final String twoDigitHour = dateTime.hour.toString().padLeft(2, '0');
@@ -28,7 +30,7 @@ class HistoryTab extends StatelessWidget {
       separatorBuilder: (BuildContext context, int index) =>
           const SizedBox(height: 10),
       itemBuilder: (BuildContext context, int index) {
-        final ScoreHistoryEntry entry = history[index];
+        final ScoreHistoryEntry entry = history.elementAt(index);
         final bool isPositive = entry.delta > 0;
         return ListTile(
           shape: RoundedRectangleBorder(
