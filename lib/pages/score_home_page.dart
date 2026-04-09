@@ -137,13 +137,15 @@ class _ScoreHomePageState extends State<ScoreHomePage>
     });
   }
 
-    Future<void> _resetScores() async {
+  Future<void> _resetScores() async {
     final bool? confirm = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Reset all scores'),
-          content: const Text('Are you sure you want to reset all scores to zero? This action cannot be undone.'),
+          content: const Text(
+            'Are you sure you want to reset all scores to zero? This action cannot be undone.',
+          ),
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.pop(context, false),
@@ -178,6 +180,11 @@ class _ScoreHomePageState extends State<ScoreHomePage>
     });
   }
 
+  void _deleteUser(ScoreUser user) {
+    setState(() {
+      _users.remove(user);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -201,6 +208,7 @@ class _ScoreHomePageState extends State<ScoreHomePage>
             onAddScore: (ScoreUser user) => _changeScore(user, true),
             onSubtractScore: (ScoreUser user) => _changeScore(user, false),
             onResetScore: _resetScores,
+            onDeleteUser: _deleteUser,
           ),
           HistoryTab(history: _history),
         ],

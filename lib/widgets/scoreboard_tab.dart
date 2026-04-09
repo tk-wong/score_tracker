@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/score_user.dart';
 
-class ScoreboardTab extends StatefulWidget {
+class ScoreboardTab extends StatelessWidget {
   const ScoreboardTab({
     super.key,
     required this.users,
@@ -10,6 +10,7 @@ class ScoreboardTab extends StatefulWidget {
     required this.onAddScore,
     required this.onSubtractScore,
     required this.onResetScore,
+    required this.onDeleteUser,
   });
 
   final List<ScoreUser> users;
@@ -17,12 +18,8 @@ class ScoreboardTab extends StatefulWidget {
   final ValueChanged<ScoreUser> onAddScore;
   final ValueChanged<ScoreUser> onSubtractScore;
   final VoidCallback onResetScore;
+  final ValueChanged<ScoreUser> onDeleteUser;
 
-  @override
-  State<ScoreboardTab> createState() => _ScoreboardTabState();
-}
-
-class _ScoreboardTabState extends State<ScoreboardTab> {
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -37,12 +34,12 @@ class _ScoreboardTabState extends State<ScoreboardTab> {
                 spacing: 8,
                 children: [
                   FilledButton.icon(
-                    onPressed: widget.onResetScore,
-                    label: const Text("Reset scores"),
+                    onPressed: onResetScore,
+                    label: const Text('Reset scores'),
                     icon: const Icon(Icons.refresh),
                   ),
                   FilledButton.icon(
-                    onPressed: widget.onAddUser,
+                    onPressed: onAddUser,
                     icon: const Icon(Icons.person_add),
                     label: const Text('Add user'),
                   ),
@@ -52,74 +49,16 @@ class _ScoreboardTabState extends State<ScoreboardTab> {
           ),
         ),
         Expanded(
-          child: widget.users.isEmpty
+          child: users.isEmpty
               ? const Center(child: Text('No users added yet.'))
               : ListView.separated(
-                  itemCount: widget.users.length,
+                  itemCount: users.length,
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                   separatorBuilder: (BuildContext context, int index) =>
                       const SizedBox(height: 12),
                   itemBuilder: (BuildContext context, int index) {
-                    final ScoreUser user = widget.users[index];
-                    return Dismissible(
-                      background: Container(
-                        // color: Colors.red,
-                        alignment: Alignment.centerRight,
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        decoration: BoxDecoration(
-                          color: Colors.red,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          'Delete',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ),
-                      direction: DismissDirection.endToStart,
-                      key: Key(user.name),
-                      confirmDismiss: (direction) async {
-                        final bool? confirm = await showDialog<bool>(
-                          context: context,
-                          builder: (BuildContext context) {
-                            final userName = widget.users[index].name;
-                            return AlertDialog(
-                              title: const Text('Delete user'),
-                              content: Text(
-                                'Are you sure you want to delete $userName? This action cannot be undone.',
-                              ),
-                              actions: <Widget>[
-                                TextButton(
-                                  onPressed: () =>
-                                      Navigator.pop(context, false),
-                                  child: const Text('Cancel'),
-                                ),
-                                FilledButton(
-                                  onPressed: () => Navigator.pop(context, true),
-                                  child: const Text('Delete'),
-                                ),
-                              ],
-                            );
-                          },
-                        );
-
-                        return confirm ?? false;
-                      },
-                      onDismissed: (direction) async {
-                        
-                        setState(() {
-                          widget.users.removeAt(index);
-                        });
-
-                        // Handle dismissal logic if needed
-                      },
-                      child: Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Row(
-                            children: <Widget>[
+                    final ScoreUser user = users[index];
+                    var userDisplayList = <Widget>[
                               CircleAvatar(
                                 child: Text(user.name.characters.first),
                               ),
@@ -140,16 +79,70 @@ class _ScoreboardTabState extends State<ScoreboardTab> {
                               ),
                               IconButton.filledTonal(
                                 tooltip: 'Subtract score',
-                                onPressed: () => widget.onSubtractScore(user),
+                                onPressed: () => onSubtractScore(user),
                                 icon: const Icon(Icons.remove),
                               ),
                               const SizedBox(width: 8),
                               IconButton.filled(
                                 tooltip: 'Add score',
-                                onPressed: () => widget.onAddScore(user),
+                                onPressed: () => onAddScore(user),
                                 icon: const Icon(Icons.add),
                               ),
-                            ],
+                            ];
+                    return Dismissible(
+                      background: Container(
+                        alignment: Alignment.centerRight,
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          'Delete',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                      direction: DismissDirection.endToStart,
+                      key: Key(user.name),
+                      confirmDismiss: (DismissDirection direction) async {
+                        final bool? confirm = await showDialog<bool>(
+                          context: context,
+                          builder: (BuildContext dialogContext) {
+                            final String userName = users[index].name;
+                            return AlertDialog(
+                              title: const Text('Delete user'),
+                              content: Text(
+                                'Are you sure you want to delete $userName? This action cannot be undone.',
+                              ),
+                              actions: <Widget>[
+                                TextButton(
+                                  onPressed: () =>
+                                      Navigator.pop(dialogContext, false),
+                                  child: const Text('Cancel'),
+                                ),
+                                FilledButton(
+                                  onPressed: () =>
+                                      Navigator.pop(dialogContext, true),
+                                  child: const Text('Delete'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+
+                        return confirm ?? false;
+                      },
+                      onDismissed: (DismissDirection direction) {
+                        onDeleteUser(user);
+                      },
+                      child: Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Row(
+                            children: userDisplayList,
                           ),
                         ),
                       ),
