@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../models/score_reason.dart';
 
@@ -18,19 +19,38 @@ class ReasonDialog extends StatefulWidget {
 
 class _ReasonDialogState extends State<ReasonDialog> {
   final TextEditingController _customReasonController = TextEditingController();
+  final TextEditingController _customDeltaController = TextEditingController();
   ScoreReason? _selectedDefault;
 
   @override
   void dispose() {
     _customReasonController.dispose();
+    _customDeltaController.dispose();
     super.dispose();
   }
 
-  void _submit() {
+  void _submit() async {
+    final int customDelta = _customDeltaController.text.trim().isEmpty
+        ? 1
+        : int.parse(_customDeltaController.text.trim());
     final String customReason = _customReasonController.text.trim();
     if (_selectedDefault == null && customReason.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select or enter a reason.')),
+      await showDialog<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Error'),
+            content: const Text(
+              'Please select a default reason or enter a custom reason.',
+            ),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
       );
       return;
     }
@@ -40,9 +60,12 @@ class _ReasonDialogState extends State<ReasonDialog> {
       return;
     }
 
-    Navigator.of(
-      context,
-    ).pop(ScoreReason(label: customReason, delta: widget.isIncrease ? 1 : -1));
+    Navigator.of(context).pop(
+      ScoreReason(
+        label: customReason,
+        delta: widget.isIncrease ? customDelta : -customDelta,
+      ),
+    );
   }
 
   @override
@@ -102,8 +125,19 @@ class _ReasonDialogState extends State<ReasonDialog> {
                 }
               },
             ),
+            TextField(
+              controller: _customDeltaController,
+              decoration: InputDecoration(
+                labelText: 'Custom score',
+                hintText: 'Example: 2',
+              ),
+              keyboardType: TextInputType.number,
+              inputFormatters: <TextInputFormatter>[
+                FilteringTextInputFormatter.digitsOnly,
+              ],
+            ),
             Text(
-              'Custom reason applies ${widget.isIncrease ? '+1' : '-1'} score.',
+              'Default is 1 if left empty',
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
@@ -114,7 +148,10 @@ class _ReasonDialogState extends State<ReasonDialog> {
           onPressed: () => Navigator.of(context).pop(),
           child: const Text('Cancel'),
         ),
-        FilledButton(onPressed: _submit, child: const Text('Confirm')),
+        FilledButton(
+          onPressed: _submit,
+          child: const Text('Confirm'),
+        ),
       ],
     );
   }
