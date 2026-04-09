@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'l10n/app_localizations.dart';
 import 'pages/score_home_page.dart';
 
 void main() {
@@ -14,6 +14,8 @@ class ScoreApp extends StatelessWidget {
     return MaterialApp(
       title: 'Team Score Tracker',
       debugShowCheckedModeBanner: false,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
         useMaterial3: true,
