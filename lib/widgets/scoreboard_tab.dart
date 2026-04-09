@@ -26,26 +26,42 @@ class ScoreboardTab extends StatelessWidget {
       children: <Widget>[
         Padding(
           padding: const EdgeInsets.all(16),
-          child: Row(
-            children: <Widget>[
-              Text('Users', style: Theme.of(context).textTheme.titleLarge),
-              const Spacer(),
-              Row(
-                spacing: 8,
-                children: [
-                  FilledButton.icon(
-                    onPressed: onResetScore,
-                    label: const Text('Reset scores'),
-                    icon: const Icon(Icons.refresh),
-                  ),
-                  FilledButton.icon(
-                    onPressed: onAddUser,
-                    icon: const Icon(Icons.person_add),
-                    label: const Text('Add user'),
-                  ),
+          child: LayoutBuilder(
+            builder: (BuildContext context, BoxConstraints constraints) {
+            const double compactHeaderBreakpoint = 420;
+            final bool isCompact = constraints.maxWidth < compactHeaderBreakpoint;
+              return Row(
+                children: <Widget>[
+                  Text('Users', style: Theme.of(context).textTheme.titleLarge),
+                  const Spacer(),
+                  if (isCompact) ...<Widget>[
+                    IconButton.filledTonal(
+                      tooltip: 'Reset scores',
+                      onPressed: onResetScore,
+                      icon: const Icon(Icons.refresh),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton.filled(
+                      tooltip: 'Add user',
+                      onPressed: onAddUser,
+                      icon: const Icon(Icons.person_add),
+                    ),
+                  ] else ...<Widget>[
+                    FilledButton.icon(
+                      onPressed: onResetScore,
+                      label: const Text('Reset scores'),
+                      icon: const Icon(Icons.refresh),
+                    ),
+                    const SizedBox(width: 8),
+                    FilledButton.icon(
+                      onPressed: onAddUser,
+                      icon: const Icon(Icons.person_add),
+                      label: const Text('Add user'),
+                    ),
+                  ],
                 ],
-              ),
-            ],
+              );
+            },
           ),
         ),
         Expanded(
@@ -58,37 +74,33 @@ class ScoreboardTab extends StatelessWidget {
                       const SizedBox(height: 12),
                   itemBuilder: (BuildContext context, int index) {
                     final ScoreUser user = users[index];
-                    var userDisplayList = <Widget>[
-                              CircleAvatar(
-                                child: Text(user.name.characters.first),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    Text(
-                                      user.name,
-                                      style: Theme.of(
-                                        context,
-                                      ).textTheme.titleMedium,
-                                    ),
-                                    Text('Score: ${user.score}'),
-                                  ],
-                                ),
-                              ),
-                              IconButton.filledTonal(
-                                tooltip: 'Subtract score',
-                                onPressed: () => onSubtractScore(user),
-                                icon: const Icon(Icons.remove),
-                              ),
-                              const SizedBox(width: 8),
-                              IconButton.filled(
-                                tooltip: 'Add score',
-                                onPressed: () => onAddScore(user),
-                                icon: const Icon(Icons.add),
-                              ),
-                            ];
+                    final List<Widget> userDisplayList = <Widget>[
+                      CircleAvatar(child: Text(user.name.characters.first)),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Text(
+                              user.name,
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
+                            Text('Score: ${user.score}'),
+                          ],
+                        ),
+                      ),
+                      IconButton.filledTonal(
+                        tooltip: 'Subtract score',
+                        onPressed: () => onSubtractScore(user),
+                        icon: const Icon(Icons.remove),
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton.filled(
+                        tooltip: 'Add score',
+                        onPressed: () => onAddScore(user),
+                        icon: const Icon(Icons.add),
+                      ),
+                    ];
                     return Dismissible(
                       background: Container(
                         alignment: Alignment.centerRight,
@@ -141,9 +153,7 @@ class ScoreboardTab extends StatelessWidget {
                       child: Card(
                         child: Padding(
                           padding: const EdgeInsets.all(16),
-                          child: Row(
-                            children: userDisplayList,
-                          ),
+                          child: Row(children: userDisplayList),
                         ),
                       ),
                     );
