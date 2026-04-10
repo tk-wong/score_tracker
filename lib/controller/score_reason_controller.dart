@@ -1,0 +1,41 @@
+import 'package:score_app/models/score_reason.dart';
+import 'package:score_app/objectbox.g.dart';
+
+class ScoreReasonController {
+  late final _store;
+  late final _scoreReasonBox;
+  ScoreReasonController.create(this._store) {
+    _scoreReasonBox = _store.box<ScoreReason>();
+  }
+
+  Stream<List<ScoreReason>> getAllReasons() {
+    final query = _scoreReasonBox.query().watch(triggerImmediately: true);
+    return query.map((q) => q.find());
+  }
+
+  Stream<List<ScoreReason>> getPositiveReasons() {
+    final query = _scoreReasonBox
+        .query(ScoreReason_.delta.greaterOrEqual(0))
+        .watch(triggerImmediately: true);
+    return query.map((q) => q.find());
+  }
+
+  Stream<List<ScoreReason>> getNegativeReasons() {
+    final query = _scoreReasonBox
+        .query(ScoreReason_.delta.lessThan(0))
+        .watch(triggerImmediately: true);
+    return query.map((q) => q.find());
+  }
+
+  void loadDefaultReasons() {
+    final List<ScoreReason> defaultReasons = <ScoreReason>[
+      ScoreReason(label: 'Correct answer', delta: 10),
+      ScoreReason(label: 'Fastest response', delta: 5),
+      ScoreReason(label: 'Teamwork bonus', delta: 3),
+      ScoreReason(label: 'Wrong answer', delta: -5),
+      ScoreReason(label: 'Rule violation', delta: -10),
+    ];
+
+    _scoreReasonBox.putMany(defaultReasons);
+  }
+}

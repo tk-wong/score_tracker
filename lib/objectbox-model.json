@@ -1,0 +1,100 @@
+{
+  "_note1": "KEEP THIS FILE! Check it into a version control system (VCS) like git.",
+  "_note2": "ObjectBox manages crucial IDs for your object model. See docs for details.",
+  "_note3": "If you have VCS merge conflicts, you must resolve them according to ObjectBox docs.",
+  "entities": [
+    {
+      "id": "1:5129664310427820535",
+      "lastPropertyId": "3:1747462342931214378",
+      "name": "ScoreUser",
+      "properties": [
+        {
+          "id": "1:4573054970992775381",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:8120673109299526800",
+          "name": "name",
+          "type": 9
+        },
+        {
+          "id": "3:1747462342931214378",
+          "name": "score",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "2:8095024443570221459",
+      "lastPropertyId": "5:5737414133214264127",
+      "name": "ScoreHistoryEntry",
+      "properties": [
+        {
+          "id": "1:4427927214551890156",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:7502618915735011085",
+          "name": "userName",
+          "type": 9
+        },
+        {
+          "id": "3:5217357705372808917",
+          "name": "delta",
+          "type": 6
+        },
+        {
+          "id": "4:5115785778920933331",
+          "name": "reason",
+          "type": 9
+        },
+        {
+          "id": "5:5737414133214264127",
+          "name": "timestamp",
+          "type": 10
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "3:2250441183958670419",
+      "lastPropertyId": "3:2435331068842080532",
+      "name": "ScoreReason",
+      "properties": [
+        {
+          "id": "1:6764526366783414864",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:5460127457369345864",
+          "name": "label",
+          "type": 9
+        },
+        {
+          "id": "3:2435331068842080532",
+          "name": "delta",
+          "type": 6
+        }
+      ],
+      "relations": []
+    }
+  ],
+  "lastEntityId": "3:2250441183958670419",
+  "lastIndexId": "0:0",
+  "lastRelationId": "0:0",
+  "lastSequenceId": "0:0",
+  "modelVersion": 5,
+  "modelVersionParserMinimum": 5,
+  "retiredEntityUids": [],
+  "retiredIndexUids": [],
+  "retiredPropertyUids": [],
+  "retiredRelationUids": [],
+  "version": 1
+}

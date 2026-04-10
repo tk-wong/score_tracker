@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:objectbox/objectbox.dart';
+import 'package:score_app/controller/score_reason_controller.dart';
+import 'package:score_app/models/object_box.dart';
 import 'l10n/app_localizations.dart';
 import 'pages/score_home_page.dart';
 
-void main() {
+late ObjectBox objectBox;
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  objectBox = await ObjectBox.create();
+  Store store = objectBox.store; // Access the store if needed for setup
+  ScoreReasonController reasonController = ScoreReasonController.create(store);
+  reasonController.loadDefaultReasons(); // Load default reasons into the database
   runApp(const ScoreApp());
 }
 

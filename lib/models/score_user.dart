@@ -1,6 +1,14 @@
-class ScoreUser {
-  ScoreUser({required this.name, this.score = 0});
+import 'package:objectbox/objectbox.dart';
 
-  final String name;
-  int score;
+@Entity()
+class ScoreUser {
+  @Id()
+  int id;
+   String name;
+   int score;
+  ScoreUser({
+    required this.name,
+    this.id = 0,
+    this.score = 0,
+  });
 }
