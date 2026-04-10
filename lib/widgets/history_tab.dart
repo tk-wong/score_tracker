@@ -7,7 +7,7 @@ import '../models/score_history_entry.dart';
 class HistoryTab extends StatelessWidget {
   const HistoryTab({super.key, required this.history});
 
-  final Queue<ScoreHistoryEntry> history;
+  final List<ScoreHistoryEntry> history;
 
   String _formatDate(DateTime dateTime) {
     final String twoDigitHour = dateTime.hour.toString().padLeft(2, '0');

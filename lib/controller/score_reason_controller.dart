@@ -14,14 +14,14 @@ class ScoreReasonController {
   }
 
   Stream<List<ScoreReason>> getPositiveReasons() {
-    final query = _scoreReasonBox
+    final Stream<Query<ScoreReason>> query = _scoreReasonBox
         .query(ScoreReason_.delta.greaterOrEqual(0))
         .watch(triggerImmediately: true);
     return query.map((q) => q.find());
   }
 
   Stream<List<ScoreReason>> getNegativeReasons() {
-    final query = _scoreReasonBox
+    final Stream<Query<ScoreReason>> query = _scoreReasonBox
         .query(ScoreReason_.delta.lessThan(0))
         .watch(triggerImmediately: true);
     return query.map((q) => q.find());
@@ -36,6 +36,8 @@ class ScoreReasonController {
       ScoreReason(label: 'Rule violation', delta: -10),
     ];
 
-    _scoreReasonBox.putMany(defaultReasons);
+    if (_scoreReasonBox.isEmpty()) {
+      _scoreReasonBox.putMany(defaultReasons);
+    }
   }
 }

@@ -1,6 +1,10 @@
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
+import 'package:score_app/controller/score_history_entry_controller.dart';
+import 'package:score_app/controller/score_reason_controller.dart';
+import 'package:score_app/controller/score_user_controller.dart';
+import 'package:score_app/main.dart';
 
 import '../models/score_history_entry.dart';
 import '../models/score_reason.dart';
@@ -20,25 +24,19 @@ class _ScoreHomePageState extends State<ScoreHomePage>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
 
-  final List<ScoreUser> _users = <ScoreUser>[
-    ScoreUser(name: 'Alice'),
-    ScoreUser(name: 'Bob'),
-  ];
 
-  final List<ScoreReason> _defaultReasons = const <ScoreReason>[
-    ScoreReason(label: 'Correct answer', delta: 10),
-    ScoreReason(label: 'Fastest response', delta: 5),
-    ScoreReason(label: 'Teamwork bonus', delta: 3),
-    ScoreReason(label: 'Wrong answer', delta: -5),
-    ScoreReason(label: 'Rule violation', delta: -10),
-  ];
 
-  final Queue<ScoreHistoryEntry> _history = ListQueue<ScoreHistoryEntry>();
 
+  late final ScoreUserController _userController;
+  late final ScoreReasonController _reasonController;
+  late final ScoreHistoryEntryController _historyController;
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _userController = ScoreUserController.create(objectBox.store);
+    _reasonController = ScoreReasonController.create(objectBox.store);
+    _historyController = ScoreHistoryEntryController.create(objectBox.store);
   }
 
   @override
@@ -83,10 +81,7 @@ class _ScoreHomePageState extends State<ScoreHomePage>
       return;
     }
 
-    final bool exists = _users.any(
-      (ScoreUser user) =>
-          user.name.toLowerCase() == newName.trim().toLowerCase(),
-    );
+    final bool exists = _userController.checkUserExists(newName.trim());
 
     if (exists) {
       if (!mounted) {
@@ -99,19 +94,17 @@ class _ScoreHomePageState extends State<ScoreHomePage>
     }
 
     setState(() {
-      _users.add(ScoreUser(name: newName.trim()));
+      _userController.addUser(newName.trim());
     });
   }
 
   Future<void> _changeScore(ScoreUser user, bool isIncrease) async {
-    final List<ScoreReason> filtered = _defaultReasons.where((
-      ScoreReason item,
-    ) {
-      if (isIncrease) {
-        return item.delta > 0;
-      }
-      return item.delta < 0;
-    }).toList();
+    late final List<ScoreReason> filtered;
+    if (isIncrease) {
+      filtered = await _reasonController.getPositiveReasons().first;
+    } else {
+      filtered = await _reasonController.getNegativeReasons().first;
+    }
 
     final ScoreReason? result = await showDialog<ScoreReason>(
       context: context,
@@ -125,15 +118,8 @@ class _ScoreHomePageState extends State<ScoreHomePage>
     }
 
     setState(() {
-      user.score += result.delta;
-      _history.addFirst(
-        ScoreHistoryEntry(
-          userName: user.name,
-          delta: result.delta,
-          reason: result.label,
-          timestamp: DateTime.now(),
-        ),
-      );
+        _userController.updateUserScore(user, result.delta);
+        _historyController.addHistoryEntry(user.name, result.delta, result.label);
     });
   }
 
@@ -165,24 +151,18 @@ class _ScoreHomePageState extends State<ScoreHomePage>
     }
 
     setState(() {
-      for (final ScoreUser user in _users) {
-        final int oldScore = user.score;
-        user.score = 0;
-        _history.addFirst(
-          ScoreHistoryEntry(
-            userName: user.name,
-            delta: -oldScore,
-            reason: 'Score reset',
-            timestamp: DateTime.now(),
-          ),
-        );
+      final List<ScoreUser> users = _userController.resetScores();
+      for (final ScoreUser user in users) {
+        // final int oldScore = user.score;
+        // user.score = 0;
+        _historyController.addHistoryEntry(user.name, -user.score, 'Score reset');
       }
     });
   }
 
   void _deleteUser(ScoreUser user) {
     setState(() {
-      _users.remove(user);
+      _userController.removeUser(user);
     });
   }
 
@@ -202,15 +182,49 @@ class _ScoreHomePageState extends State<ScoreHomePage>
       body: TabBarView(
         controller: _tabController,
         children: <Widget>[
-          ScoreboardTab(
-            users: _users,
-            onAddUser: _promptAddUser,
-            onAddScore: (ScoreUser user) => _changeScore(user, true),
-            onSubtractScore: (ScoreUser user) => _changeScore(user, false),
-            onResetScore: _resetScores,
-            onDeleteUser: _deleteUser,
+          StreamBuilder(
+            stream: _userController.getAllUsers(),
+            builder:
+                (
+                  BuildContext context,
+                  AsyncSnapshot<List<ScoreUser>> snapshot,
+                ) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  } else {
+                    final List<ScoreUser> users = snapshot.data ?? [];
+                    return ScoreboardTab(
+                      users: users,
+                      onAddUser: _promptAddUser,
+                      onAddScore: (ScoreUser user) => _changeScore(user, true),
+                      onSubtractScore: (ScoreUser user) =>
+                          _changeScore(user, false),
+                      onResetScore: _resetScores,
+                      onDeleteUser: _deleteUser,
+                    );
+                  }
+                },
           ),
-          HistoryTab(history: _history),
+          StreamBuilder(
+            stream: _historyController.getAllHistoryEntries(),
+            builder:
+                (
+                  BuildContext context,
+                  AsyncSnapshot<List<ScoreHistoryEntry>> snapshot,
+                ) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  } else {
+                    final List<ScoreHistoryEntry> histories = snapshot.data ?? [];
+                    return HistoryTab(history: histories);
+                  }
+                },
+          ),
+          
         ],
       ),
     );
