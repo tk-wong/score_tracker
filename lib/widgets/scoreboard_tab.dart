@@ -20,6 +20,8 @@ class ScoreboardTab extends StatelessWidget {
   final VoidCallback onResetScore;
   final ValueChanged<ScoreUser> onDeleteUser;
 
+
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -118,7 +120,7 @@ class ScoreboardTab extends StatelessWidget {
                         ),
                       ),
                       direction: DismissDirection.endToStart,
-                      key: Key(user.name),
+                      key: Key(user.id.toString()),
                       confirmDismiss: (DismissDirection direction) async {
                         final bool? confirm = await showDialog<bool>(
                           context: context,

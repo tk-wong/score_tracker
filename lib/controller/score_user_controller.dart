@@ -1,3 +1,4 @@
+
 import 'package:score_app/models/score_user.dart';
 import 'package:score_app/objectbox.g.dart';
 
@@ -9,8 +10,12 @@ class ScoreUserController {
   }
 
   Stream<List<ScoreUser>> getAllUsers() {
-    final query = _scoreUserBox.query().watch(triggerImmediately: true);
-    return query.map((q) => q.find());
+    final userStream = _scoreUserBox
+        .query()
+        .watch(triggerImmediately: true)
+        .map((q) => q.find())
+        ;
+    return userStream;
   }
 
   void removeUser(ScoreUser user) {
@@ -30,7 +35,7 @@ class ScoreUserController {
       ScoreUser(name: 'Alice'),
       ScoreUser(name: 'Bob'),
     ];
-    if(_scoreUserBox.isEmpty()) {
+    if (_scoreUserBox.isEmpty()) {
       _scoreUserBox.putMany(users);
     }
   }
@@ -55,7 +60,7 @@ class ScoreUserController {
     return users;
   }
 
-  void updateUserScore(ScoreUser user, int delta){
+  void updateUserScore(ScoreUser user, int delta) {
     user.score += delta;
     _scoreUserBox.put(user);
   }

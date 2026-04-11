@@ -1,4 +1,4 @@
-import 'dart:collection';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:score_app/controller/score_history_entry_controller.dart';
@@ -24,12 +24,20 @@ class _ScoreHomePageState extends State<ScoreHomePage>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
 
-
-
-
   late final ScoreUserController _userController;
   late final ScoreReasonController _reasonController;
   late final ScoreHistoryEntryController _historyController;
+  late final Stream<List<ScoreUser>> _userStream;
+
+  late StreamSubscription<List<ScoreUser>> _userSubscription;
+  late StreamSubscription<List<ScoreHistoryEntry>> _historySubscription;
+
+  List<ScoreUser> _users = [];
+  bool _isUserLoading = true;
+
+  List<ScoreHistoryEntry> _historyEntries = [];
+  bool _isHistoryLoading = true;
+
   @override
   void initState() {
     super.initState();
@@ -37,11 +45,32 @@ class _ScoreHomePageState extends State<ScoreHomePage>
     _userController = ScoreUserController.create(objectBox.store);
     _reasonController = ScoreReasonController.create(objectBox.store);
     _historyController = ScoreHistoryEntryController.create(objectBox.store);
+    _userStream = _userController.getAllUsers();
+    _userSubscription = _userStream.listen((List<ScoreUser> users) {
+      if (mounted) {
+        setState(() {
+          _users = users;
+          _isUserLoading = false;
+        });
+      }
+      _historySubscription = _historyController.getAllHistoryEntries().listen(
+        (List<ScoreHistoryEntry> entries) {
+          if (mounted) {
+            setState(() {
+              _historyEntries = entries;
+              _isHistoryLoading = false;
+            });
+          }
+        },
+      );
+    });
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    _userSubscription.cancel();
+    _historySubscription.cancel();
     super.dispose();
   }
 
@@ -118,8 +147,8 @@ class _ScoreHomePageState extends State<ScoreHomePage>
     }
 
     setState(() {
-        _userController.updateUserScore(user, result.delta);
-        _historyController.addHistoryEntry(user.name, result.delta, result.label);
+      _userController.updateUserScore(user, result.delta);
+      _historyController.addHistoryEntry(user.name, result.delta, result.label);
     });
   }
 
@@ -155,13 +184,18 @@ class _ScoreHomePageState extends State<ScoreHomePage>
       for (final ScoreUser user in users) {
         // final int oldScore = user.score;
         // user.score = 0;
-        _historyController.addHistoryEntry(user.name, -user.score, 'Score reset');
+        _historyController.addHistoryEntry(
+          user.name,
+          -user.score,
+          'Score reset',
+        );
       }
     });
   }
 
   void _deleteUser(ScoreUser user) {
     setState(() {
+    _users.removeWhere((ScoreUser u) => u.id == user.id);
       _userController.removeUser(user);
     });
   }
@@ -182,49 +216,20 @@ class _ScoreHomePageState extends State<ScoreHomePage>
       body: TabBarView(
         controller: _tabController,
         children: <Widget>[
-          StreamBuilder(
-            stream: _userController.getAllUsers(),
-            builder:
-                (
-                  BuildContext context,
-                  AsyncSnapshot<List<ScoreUser>> snapshot,
-                ) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
-                  } else {
-                    final List<ScoreUser> users = snapshot.data ?? [];
-                    return ScoreboardTab(
-                      users: users,
-                      onAddUser: _promptAddUser,
-                      onAddScore: (ScoreUser user) => _changeScore(user, true),
-                      onSubtractScore: (ScoreUser user) =>
-                          _changeScore(user, false),
-                      onResetScore: _resetScores,
-                      onDeleteUser: _deleteUser,
-                    );
-                  }
-                },
-          ),
-          StreamBuilder(
-            stream: _historyController.getAllHistoryEntries(),
-            builder:
-                (
-                  BuildContext context,
-                  AsyncSnapshot<List<ScoreHistoryEntry>> snapshot,
-                ) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
-                  } else {
-                    final List<ScoreHistoryEntry> histories = snapshot.data ?? [];
-                    return HistoryTab(history: histories);
-                  }
-                },
-          ),
-          
+          _isUserLoading
+              ? const Center(child: CircularProgressIndicator())
+              : ScoreboardTab(
+                  users: _users,
+                  onAddUser: _promptAddUser,
+                  onAddScore: (ScoreUser user) => _changeScore(user, true),
+                  onSubtractScore: (ScoreUser user) =>
+                      _changeScore(user, false),
+                  onResetScore: _resetScores,
+                  onDeleteUser: _deleteUser,
+                ),
+            _isHistoryLoading
+                ? const Center(child: CircularProgressIndicator())
+                : HistoryTab(history: _historyEntries),
         ],
       ),
     );

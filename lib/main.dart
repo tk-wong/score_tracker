@@ -3,7 +3,6 @@ import 'package:objectbox/objectbox.dart';
 import 'package:score_app/controller/score_reason_controller.dart';
 import 'package:score_app/controller/score_user_controller.dart';
 import 'package:score_app/models/object_box.dart';
-import 'package:score_app/models/score_history_entry.dart';
 import 'l10n/app_localizations.dart';
 import 'pages/score_home_page.dart';
 
