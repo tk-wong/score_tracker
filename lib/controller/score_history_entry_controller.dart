@@ -1,5 +1,6 @@
 import 'package:objectbox/objectbox.dart';
 import 'package:score_app/models/score_history_entry.dart';
+import 'package:score_app/objectbox.g.dart';
 
 class ScoreHistoryEntryController {
   late final Store _store;
@@ -9,7 +10,10 @@ class ScoreHistoryEntryController {
   }
 
   Stream<List<ScoreHistoryEntry>> getAllHistoryEntries() {
-    final query = _scoreHistoryEntryBox.query().watch(triggerImmediately: true);
+    final query = _scoreHistoryEntryBox
+        .query()
+        .order(ScoreHistoryEntry_.timestamp, flags: Order.descending)
+        .watch(triggerImmediately: true);
     return query.map((q) => q.find());
   }
 
