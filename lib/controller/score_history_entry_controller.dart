@@ -1,4 +1,3 @@
-import 'package:objectbox/objectbox.dart';
 import 'package:score_app/models/score_history_entry.dart';
 import 'package:score_app/objectbox.g.dart';
 

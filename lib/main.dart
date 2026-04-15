@@ -33,6 +33,7 @@ class ScoreApp extends StatelessWidget {
         useMaterial3: true,
       ),
       home: const ScoreHomePage(),
+      
     );
   }
 }

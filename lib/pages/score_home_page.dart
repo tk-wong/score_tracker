@@ -9,9 +9,9 @@ import 'package:score_app/main.dart';
 import '../models/score_history_entry.dart';
 import '../models/score_reason.dart';
 import '../models/score_user.dart';
-import '../widgets/history_tab.dart';
-import '../widgets/reason_dialog.dart';
-import '../widgets/scoreboard_tab.dart';
+import '../widgets/history/history_tab.dart';
+import '../widgets/scoreboard/reason_dialog.dart';
+import '../widgets/scoreboard/scoreboard_tab.dart';
 
 class ScoreHomePage extends StatefulWidget {
   const ScoreHomePage({super.key});
@@ -53,16 +53,16 @@ class _ScoreHomePageState extends State<ScoreHomePage>
           _isUserLoading = false;
         });
       }
-      _historySubscription = _historyController.getAllHistoryEntries().listen(
-        (List<ScoreHistoryEntry> entries) {
-          if (mounted) {
-            setState(() {
-              _historyEntries = entries;
-              _isHistoryLoading = false;
-            });
-          }
-        },
-      );
+      _historySubscription = _historyController.getAllHistoryEntries().listen((
+        List<ScoreHistoryEntry> entries,
+      ) {
+        if (mounted) {
+          setState(() {
+            _historyEntries = entries;
+            _isHistoryLoading = false;
+          });
+        }
+      });
     });
   }
 
@@ -195,7 +195,7 @@ class _ScoreHomePageState extends State<ScoreHomePage>
 
   void _deleteUser(ScoreUser user) {
     setState(() {
-    _users.removeWhere((ScoreUser u) => u.id == user.id);
+      _users.removeWhere((ScoreUser u) => u.id == user.id);
       _userController.removeUser(user);
     });
   }
@@ -212,6 +212,7 @@ class _ScoreHomePageState extends State<ScoreHomePage>
             Tab(text: 'History', icon: Icon(Icons.history)),
           ],
         ),
+        actions: [IconButton(onPressed: null, icon: Icon(Icons.settings))],
       ),
       body: TabBarView(
         controller: _tabController,
@@ -227,9 +228,9 @@ class _ScoreHomePageState extends State<ScoreHomePage>
                   onResetScore: _resetScores,
                   onDeleteUser: _deleteUser,
                 ),
-            _isHistoryLoading
-                ? const Center(child: CircularProgressIndicator())
-                : HistoryTab(history: _historyEntries),
+          _isHistoryLoading
+              ? const Center(child: CircularProgressIndicator())
+              : HistoryTab(history: _historyEntries),
         ],
       ),
     );

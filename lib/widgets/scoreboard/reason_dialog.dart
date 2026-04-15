@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../models/score_reason.dart';
+import '../../models/score_reason.dart';
 
 class ReasonDialog extends StatefulWidget {
   const ReasonDialog({
