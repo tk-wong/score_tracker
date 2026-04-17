@@ -29,6 +29,7 @@ class ScoreboardTab extends StatelessWidget {
         ScoreboardTitle(
           onAddUser: onAddUser,
           onResetScore: onResetScore,
+          emptyUserList: users.isEmpty,
         ),
         Expanded(
           child: users.isEmpty

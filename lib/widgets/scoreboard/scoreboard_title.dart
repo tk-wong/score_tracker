@@ -5,10 +5,12 @@ class ScoreboardTitle extends StatefulWidget {
     super.key,
     required this.onAddUser,
     required this.onResetScore,
+    required this.emptyUserList,
   });
 
   final VoidCallback onAddUser;
   final VoidCallback onResetScore;
+  final bool emptyUserList;
 
   @override
   State<ScoreboardTitle> createState() => _ScoreboardTitleState();
@@ -30,7 +32,7 @@ class _ScoreboardTitleState extends State<ScoreboardTitle> {
               if (isCompact) ...<Widget>[
                 IconButton.filledTonal(
                   tooltip: 'Reset scores',
-                  onPressed: widget.onResetScore,
+                  onPressed: widget.emptyUserList ? null : widget.onResetScore,
                   icon: const Icon(Icons.refresh),
                 ),
                 const SizedBox(width: 8),
@@ -41,7 +43,7 @@ class _ScoreboardTitleState extends State<ScoreboardTitle> {
                 ),
               ] else ...<Widget>[
                 FilledButton.icon(
-                  onPressed: widget.onResetScore,
+                  onPressed: widget.emptyUserList ? null : widget.onResetScore,
                   label: const Text('Reset scores'),
                   icon: const Icon(Icons.refresh),
                 ),
