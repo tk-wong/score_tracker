@@ -4,9 +4,10 @@ import 'package:score_app/widgets/history/history_list.dart';
 import '../../models/score_history_entry.dart';
 
 class HistoryTab extends StatelessWidget {
-  const HistoryTab({super.key, required this.history});
+  const HistoryTab({super.key, required this.history, required this.onClearHistory});
 
   final List<ScoreHistoryEntry> history;
+   final VoidCallback onClearHistory;
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +17,7 @@ class HistoryTab extends StatelessWidget {
 
     return Column(
       children: [
-        HistoryTitle(),
+        HistoryTitle(onClearHistory: onClearHistory),
         Expanded(child: HistoryList(history: history)),
       ],
     );

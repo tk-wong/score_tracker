@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class ScoreboardTitle extends StatelessWidget {
+class ScoreboardTitle extends StatefulWidget {
   const ScoreboardTitle({
     super.key,
     required this.onAddUser,
@@ -10,6 +10,11 @@ class ScoreboardTitle extends StatelessWidget {
   final VoidCallback onAddUser;
   final VoidCallback onResetScore;
 
+  @override
+  State<ScoreboardTitle> createState() => _ScoreboardTitleState();
+}
+
+class _ScoreboardTitleState extends State<ScoreboardTitle> {
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -25,24 +30,24 @@ class ScoreboardTitle extends StatelessWidget {
               if (isCompact) ...<Widget>[
                 IconButton.filledTonal(
                   tooltip: 'Reset scores',
-                  onPressed: onResetScore,
+                  onPressed: widget.onResetScore,
                   icon: const Icon(Icons.refresh),
                 ),
                 const SizedBox(width: 8),
                 IconButton.filled(
                   tooltip: 'Add user',
-                  onPressed: onAddUser,
+                  onPressed: widget.onAddUser,
                   icon: const Icon(Icons.person_add),
                 ),
               ] else ...<Widget>[
                 FilledButton.icon(
-                  onPressed: onResetScore,
+                  onPressed: widget.onResetScore,
                   label: const Text('Reset scores'),
                   icon: const Icon(Icons.refresh),
                 ),
                 const SizedBox(width: 8),
                 FilledButton.icon(
-                  onPressed: onAddUser,
+                  onPressed: widget.onAddUser,
                   icon: const Icon(Icons.person_add),
                   label: const Text('Add user'),
                 ),

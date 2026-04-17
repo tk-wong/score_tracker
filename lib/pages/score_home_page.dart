@@ -174,23 +174,65 @@ class _ScoreHomePageState extends State<ScoreHomePage>
         );
       },
     );
+  }
 
-    if (confirm != true) {
+  Future<void> _clearHistory() async {
+    final (bool confirm, bool resetScores) =
+        await showDialog<(bool, bool)>(
+          context: context,
+          builder: (BuildContext context) {
+            bool resetScores = false;
+            return StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return AlertDialog(
+                  title: const Text('Clear History'),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text(
+                        'Are you sure you want to clear all history? This action cannot be undone.',
+                      ),
+                      Row(
+                        children: [
+                          Checkbox(
+                            value: resetScores,
+                            onChanged: (bool? value) {
+                              setState(() {
+                                resetScores = value!;
+                              });
+                            },
+                          ),
+                          const Text('Also reset all scores to zero'),
+                        ],
+                      ),
+                    ],
+                  ),
+                  actions: <Widget>[
+                    TextButton(
+                      onPressed: () =>
+                          Navigator.pop(context, (false, resetScores)),
+                      child: const Text('Cancel'),
+                    ),
+                    FilledButton(
+                      onPressed: () =>
+                          Navigator.pop(context, (true, resetScores)),
+                      child: const Text('Clear'),
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+        ) ??
+        (false, false);
+
+    if (!confirm) {
       return;
     }
-
-    setState(() {
-      final List<ScoreUser> users = _userController.resetScores();
-      for (final ScoreUser user in users) {
-        // final int oldScore = user.score;
-        // user.score = 0;
-        _historyController.addHistoryEntry(
-          user.name,
-          -user.score,
-          'Score reset',
-        );
-      }
-    });
+    _historyController.clearHistory();
+    if(resetScores){
+      _userController.resetScores();
+    }
   }
 
   void _deleteUser(ScoreUser user) {
@@ -230,7 +272,10 @@ class _ScoreHomePageState extends State<ScoreHomePage>
                 ),
           _isHistoryLoading
               ? const Center(child: CircularProgressIndicator())
-              : HistoryTab(history: _historyEntries),
+              : HistoryTab(
+                  history: _historyEntries,
+                  onClearHistory: _clearHistory,
+                ),
         ],
       ),
     );

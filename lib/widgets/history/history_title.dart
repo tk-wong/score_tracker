@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 class HistoryTitle extends StatelessWidget {
-  const HistoryTitle({super.key});
-
+  const HistoryTitle({super.key, required this.onClearHistory});
+  final VoidCallback onClearHistory;
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -22,12 +22,12 @@ class HistoryTitle extends StatelessWidget {
               if (isCompact) ...<Widget>[
                 IconButton.filledTonal(
                   tooltip: 'Clear history',
-                  onPressed: null,
+                  onPressed: onClearHistory,
                   icon: const Icon(Icons.cleaning_services),
                 ),
               ] else ...<Widget>[
                 FilledButton.icon(
-                  onPressed: null,
+                  onPressed: onClearHistory,
                   label: const Text('Clear history'),
                   icon: const Icon(Icons.cleaning_services),
                 ),
