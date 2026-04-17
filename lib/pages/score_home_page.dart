@@ -134,15 +134,16 @@ class _ScoreHomePageState extends State<ScoreHomePage>
     } else {
       filtered = await _reasonController.getNegativeReasons().first;
     }
-
+    if (!mounted) {
+      return;
+    }
     final ScoreReason? result = await showDialog<ScoreReason>(
       context: context,
       builder: (BuildContext dialogContext) {
         return ReasonDialog(isIncrease: isIncrease, defaultReasons: filtered);
       },
     );
-
-    if (result == null) {
+    if (!mounted || result == null) {
       return;
     }
 
@@ -174,6 +175,22 @@ class _ScoreHomePageState extends State<ScoreHomePage>
         );
       },
     );
+    if (confirm != true) {
+      return;
+    }
+
+    setState(() {
+      final List<ScoreUser> users = _userController.resetScores();
+      for (final ScoreUser user in users) {
+        // final int oldScore = user.score;
+        // user.score = 0;
+        _historyController.addHistoryEntry(
+          user.name,
+          -user.score,
+          'Score reset',
+        );
+      }
+    });
   }
 
   Future<void> _clearHistory() async {
@@ -230,7 +247,7 @@ class _ScoreHomePageState extends State<ScoreHomePage>
       return;
     }
     _historyController.clearHistory();
-    if(resetScores){
+    if (resetScores) {
       _userController.resetScores();
     }
   }
