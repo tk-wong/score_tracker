@@ -13,12 +13,12 @@ class ObjectBox {
 
   /// Create an instance of ObjectBox to use throughout the app.
   static Future<ObjectBox> create() async {
-    final docsDir = await getApplicationDocumentsDirectory();
     // Future<Store> openStore() {...} is defined in the generated objectbox.g.dart
     late final Store store;
     if (kDebugMode) {
       store = await openStore(directory: "memory:objectbox-score-app");
     } else {
+      final docsDir = await getApplicationDocumentsDirectory();
       store = await openStore(
         directory: p.join(docsDir.path, "objectbox-score-app"),
       );

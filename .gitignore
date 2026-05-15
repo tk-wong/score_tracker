@@ -46,3 +46,4 @@ app.*.map.json
 
 # generated localization files
 /lib/l10n/app_localizations*.dart
+download/objectbox-5.3.1-windows-x64.zip
