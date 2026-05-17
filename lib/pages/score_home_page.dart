@@ -12,6 +12,7 @@ import '../models/score_user.dart';
 import '../widgets/history/history_tab.dart';
 import '../widgets/scoreboard/reason_dialog.dart';
 import '../widgets/scoreboard/scoreboard_tab.dart';
+import 'setting_page.dart';
 
 class ScoreHomePage extends StatefulWidget {
   const ScoreHomePage({super.key});
@@ -271,7 +272,12 @@ class _ScoreHomePageState extends State<ScoreHomePage>
             Tab(text: 'History', icon: Icon(Icons.history)),
           ],
         ),
-        actions: [IconButton(onPressed: null, icon: Icon(Icons.settings))],
+        actions: [IconButton(onPressed: () => {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => SettingPage()),
+              ),
+        }, icon: Icon(Icons.settings))],
       ),
       body: TabBarView(
         controller: _tabController,

@@ -9,7 +9,9 @@ class ScoreReasonController {
   }
 
   Stream<List<ScoreReason>> getAllReasons() {
-    final query = _scoreReasonBox.query().watch(triggerImmediately: true);
+    final Stream<Query<ScoreReason>> query = _scoreReasonBox.query().watch(
+      triggerImmediately: true,
+    );
     return query.map((q) => q.find());
   }
 
