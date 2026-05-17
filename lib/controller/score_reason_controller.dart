@@ -9,15 +9,17 @@ class ScoreReasonController {
   }
 
   Stream<List<ScoreReason>> getAllReasons() {
-    final Stream<Query<ScoreReason>> query = _scoreReasonBox.query().watch(
-      triggerImmediately: true,
-    );
+    final Stream<Query<ScoreReason>> query = _scoreReasonBox
+        .query()
+        .order(ScoreReason_.delta, flags: Order.descending)
+        .watch(triggerImmediately: true);
     return query.map((q) => q.find());
   }
 
   Stream<List<ScoreReason>> getPositiveReasons() {
     final Stream<Query<ScoreReason>> query = _scoreReasonBox
         .query(ScoreReason_.delta.greaterOrEqual(0))
+        .order(ScoreReason_.delta, flags: Order.descending)
         .watch(triggerImmediately: true);
     return query.map((q) => q.find());
   }
@@ -25,10 +27,14 @@ class ScoreReasonController {
   Stream<List<ScoreReason>> getNegativeReasons() {
     final Stream<Query<ScoreReason>> query = _scoreReasonBox
         .query(ScoreReason_.delta.lessThan(0))
+        .order(ScoreReason_.delta, flags: Order.descending)
         .watch(triggerImmediately: true);
     return query.map((q) => q.find());
   }
 
+  void deleteReason(int id) {
+    _scoreReasonBox.remove(id);
+  }
   void loadDefaultReasons() {
     final List<ScoreReason> defaultReasons = <ScoreReason>[
       ScoreReason(label: 'Correct answer', delta: 10),
