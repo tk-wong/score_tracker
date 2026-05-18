@@ -1,4 +1,4 @@
-# score_app
+# Score Tracker App
 
 A score app that can mark the reason for score changes, manage the default reasons, and record score history.
 
