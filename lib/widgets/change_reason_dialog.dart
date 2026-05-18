@@ -13,8 +13,7 @@ enum ScoreChangeType { increase, decrease }
 
 class _ChangeReasonDialogState extends State<ChangeReasonDialog> {
   final TextEditingController _customReasonController = TextEditingController();
-  final TextEditingController _customDeltaController = TextEditingController();
-  final List<bool> _selectedWeather = <bool>[false, false, true];
+  final TextEditingController _customScoreController = TextEditingController();
   final List<(ScoreChangeType, Icon)> icons = <(ScoreChangeType, Icon)>[
     (ScoreChangeType.increase, Icon(Icons.add)),
     (ScoreChangeType.decrease, Icon(Icons.remove)),
@@ -22,46 +21,45 @@ class _ChangeReasonDialogState extends State<ChangeReasonDialog> {
   Set<ScoreChangeType> selectedIcons = <ScoreChangeType>{
     ScoreChangeType.increase,
   };
-  ScoreReason? _selectedDefault;
-  bool _isEmptyWhenSubmit = false;
-  FocusNode _focus = FocusNode();
-
+  bool _fieldEmpty = true;
+  final _formKey = GlobalKey<FormState>();
   @override
   void initState() {
     super.initState();
-    _onFocusChange();
+    _customReasonController.addListener(_isAllFieldsNotEmpty);
+    _customScoreController.addListener(_isAllFieldsNotEmpty);
   }
 
-  void _onFocusChange() {
-    _focus.addListener(() {
-      setState(() {}); // Trigger rebuild to update the UI based on focus change
+  void _isAllFieldsNotEmpty() {
+    setState(() {
+      _fieldEmpty =
+          !(_customReasonController.text.trim().isNotEmpty &&
+              _customScoreController.text.trim().isNotEmpty);
     });
   }
 
   @override
   void dispose() {
+    _customScoreController.removeListener(_isAllFieldsNotEmpty);
+    _customReasonController.removeListener(_isAllFieldsNotEmpty);
     _customReasonController.dispose();
-    _customDeltaController.dispose();
-    _focus.removeListener(_onFocusChange);
-    _focus.dispose();
+    _customScoreController.dispose();
     super.dispose();
   }
 
   void _onSubmitForm() async {
-    final int customDelta = _customDeltaController.text.trim().isEmpty
-        ? 1
-        : int.parse(_customDeltaController.text.trim());
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+    final int? customScore = int.tryParse(_customScoreController.text.trim());
     final String customReason = _customReasonController.text.trim();
-    if (_selectedDefault == null && customReason.isEmpty) {
-      setState(() {
-        _isEmptyWhenSubmit = true;
-      });
+    if (customReason.isEmpty || customScore == null) {
       await showDialog<void>(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
             title: const Text('Error'),
-            content: const Text('Please enter a default reason.'),
+            content: const Text('Please enter a default reason and a valid score.'),
             actions: <Widget>[
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
@@ -74,17 +72,13 @@ class _ChangeReasonDialogState extends State<ChangeReasonDialog> {
       return;
     }
 
-    if (_selectedDefault != null) {
-      Navigator.of(context).pop(_selectedDefault);
-      return;
-    }
 
     Navigator.of(context).pop(
       ScoreReason(
         label: customReason,
         delta: selectedIcons.first == ScoreChangeType.increase
-            ? customDelta
-            : -customDelta,
+            ? customScore
+            : -customScore,
       ),
     );
   }
@@ -93,41 +87,44 @@ class _ChangeReasonDialogState extends State<ChangeReasonDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text("add new default reason"),
-      content: SingleChildScrollView(
+      content: Form(
+        key: _formKey,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             // const SizedBox(height: 8),
-            TextField(
+            TextFormField(
+              autovalidateMode: AutovalidateMode.onUserInteraction,
               controller: _customReasonController,
-              focusNode: _focus,
               maxLength: 60,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter default reason';
+                } else if (value.trim().length > 60) {
+                  return 'Reason must be at most 60 characters';
+                }
+                return null;
+              },
+
               decoration: InputDecoration(
                 labelText: 'New reason',
                 hintText: 'Example: "Won a game"',
-                labelStyle: TextStyle(
-                  color: _isEmptyWhenSubmit && !_focus.hasFocus
-                      ? Colors.red
-                      : Colors.grey,
-                ), // Switches color dynamically
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(
-                    color: _isEmptyWhenSubmit
-                        ? Colors.red
-                        : Colors.grey, // Switches color dynamically
-                  ),
-                ),
+                // labelStyle: TextStyle(
+                //   color: _isEmptyWhenSubmit && !_focus.hasFocus
+                //       ? Colors.red
+                //       : Colors.grey,
+                // ), // Switches color dynamically
+                // enabledBorder: UnderlineInputBorder(
+                //   borderSide: BorderSide(
+                //     color: _isEmptyWhenSubmit
+                //         ? Colors.red
+                //         : Colors.grey, // Switches color dynamically
+                //   ),
+                // ),
               ),
-              onChanged: (String value) {
-                if (value.trim().isNotEmpty) {
-                  setState(() {
-                    _isEmptyWhenSubmit =
-                        false; // Reset error state when user types
-                  });
-                }
-              },
             ),
+            const SizedBox(height: 8),
             SegmentedButton<ScoreChangeType>(
               segments: icons
                   .map((icon) => ButtonSegment(value: icon.$1, icon: icon.$2))
@@ -143,8 +140,10 @@ class _ChangeReasonDialogState extends State<ChangeReasonDialog> {
                   ? {ScoreChangeType.increase}
                   : {selectedIcons.first},
             ),
-            TextField(
-              controller: _customDeltaController,
+            const SizedBox(height: 8),
+            TextFormField(
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              controller: _customScoreController,
               decoration: InputDecoration(
                 labelText: 'New score',
                 hintText: 'Example: 2',
@@ -153,10 +152,14 @@ class _ChangeReasonDialogState extends State<ChangeReasonDialog> {
               inputFormatters: <TextInputFormatter>[
                 FilteringTextInputFormatter.digitsOnly,
               ],
-            ),
-            Text(
-              'Default is 1 if left empty',
-              style: Theme.of(context).textTheme.bodySmall,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter a score';
+                } else if (int.tryParse(value) == null) {
+                  return 'Please enter a valid number';
+                }
+                return null;
+              },
             ),
           ],
         ),
@@ -167,10 +170,19 @@ class _ChangeReasonDialogState extends State<ChangeReasonDialog> {
           child: const Text('Cancel'),
         ),
         FilledButton(
-          onPressed: _onSubmitForm,
+          onPressed:
+              checkValidForm()
+              ? _onSubmitForm
+              : null,
           child: const Text('Confirm'),
         ),
       ],
     );
+  }
+
+  bool checkValidForm() {
+    return !_fieldEmpty &&
+                _formKey.currentState != null &&
+                _formKey.currentState!.validate();
   }
 }
