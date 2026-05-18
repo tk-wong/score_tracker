@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:score_app/controller/score_reason_controller.dart';
 import 'package:score_app/main.dart';
+import 'package:score_app/models/score_reason.dart';
 import 'package:score_app/widgets/change_reason_dialog.dart';
 
 class SetReasonPage extends StatefulWidget {
@@ -26,10 +27,7 @@ void initState() {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          await showDialog(context: context, builder: (BuildContext context){
-            return ChangeReasonDialog();
-          },
-          );
+          await _handleScoreReason(context: context);
         },
         child: const Icon(Icons.add),
       ),
@@ -52,8 +50,8 @@ void initState() {
                   children: [
                     IconButton(
                       icon: Icon(Icons.edit),
-                      onPressed: () {
-                        // Handle edit reason
+                      onPressed: () async {
+                        await _handleScoreReason(context: context, reason: reason);
                       },
                     ),
                     IconButton(
@@ -91,5 +89,15 @@ void initState() {
         }
       })
     );
+  }
+
+  Future<void> _handleScoreReason({required BuildContext context, ScoreReason? reason}) async {
+    final scoreReason = await showDialog(context: context, builder: (BuildContext context){
+      return ChangeReasonDialog(reason: reason);
+    },
+    );
+    if (scoreReason != null) {
+      _reasonController.addOrUpdateReason(scoreReason);
+    }
   }
 }

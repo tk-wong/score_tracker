@@ -3,7 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:score_app/models/score_reason.dart';
 
 class ChangeReasonDialog extends StatefulWidget {
-  const ChangeReasonDialog({super.key});
+  final ScoreReason? reason;
+  const ChangeReasonDialog({super.key, this.reason});
 
   @override
   State<ChangeReasonDialog> createState() => _ChangeReasonDialogState();
@@ -12,6 +13,7 @@ class ChangeReasonDialog extends StatefulWidget {
 enum ScoreChangeType { increase, decrease }
 
 class _ChangeReasonDialogState extends State<ChangeReasonDialog> {
+  ScoreReason? get reason => widget.reason;
   final TextEditingController _customReasonController = TextEditingController();
   final TextEditingController _customScoreController = TextEditingController();
   final List<(ScoreChangeType, Icon)> icons = <(ScoreChangeType, Icon)>[
@@ -26,6 +28,13 @@ class _ChangeReasonDialogState extends State<ChangeReasonDialog> {
   @override
   void initState() {
     super.initState();
+    if (reason != null) {
+      _customReasonController.text = reason!.label;
+      _customScoreController.text = reason!.delta.abs().toString();
+      selectedIcons = reason!.delta >= 0
+          ? {ScoreChangeType.increase}
+          : {ScoreChangeType.decrease};
+    }
     _customReasonController.addListener(_isAllFieldsNotEmpty);
     _customScoreController.addListener(_isAllFieldsNotEmpty);
   }
@@ -59,7 +68,9 @@ class _ChangeReasonDialogState extends State<ChangeReasonDialog> {
         builder: (BuildContext context) {
           return AlertDialog(
             title: const Text('Error'),
-            content: const Text('Please enter a default reason and a valid score.'),
+            content: const Text(
+              'Please enter a default reason and a valid score.',
+            ),
             actions: <Widget>[
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
@@ -71,16 +82,24 @@ class _ChangeReasonDialogState extends State<ChangeReasonDialog> {
       );
       return;
     }
-
-
-    Navigator.of(context).pop(
-      ScoreReason(
+    late final ScoreReason newReason;
+    if (reason != null) {
+      newReason = ScoreReason(
+        id: reason!.id,
         label: customReason,
         delta: selectedIcons.first == ScoreChangeType.increase
             ? customScore
             : -customScore,
-      ),
-    );
+      );
+    } else {
+      newReason = ScoreReason(
+        label: customReason,
+        delta: selectedIcons.first == ScoreChangeType.increase
+            ? customScore
+            : -customScore,
+      );
+    }
+    Navigator.of(context).pop(newReason);
   }
 
   @override
@@ -170,10 +189,7 @@ class _ChangeReasonDialogState extends State<ChangeReasonDialog> {
           child: const Text('Cancel'),
         ),
         FilledButton(
-          onPressed:
-              checkValidForm()
-              ? _onSubmitForm
-              : null,
+          onPressed: checkValidForm() ? _onSubmitForm : null,
           child: const Text('Confirm'),
         ),
       ],
@@ -182,7 +198,7 @@ class _ChangeReasonDialogState extends State<ChangeReasonDialog> {
 
   bool checkValidForm() {
     return !_fieldEmpty &&
-                _formKey.currentState != null &&
-                _formKey.currentState!.validate();
+        _formKey.currentState != null &&
+        _formKey.currentState!.validate();
   }
 }

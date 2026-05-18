@@ -35,6 +35,11 @@ class ScoreReasonController {
   void deleteReason(int id) {
     _scoreReasonBox.remove(id);
   }
+
+  void addOrUpdateReason(ScoreReason reason) {
+    _scoreReasonBox.put(reason);
+  }
+
   void loadDefaultReasons() {
     final List<ScoreReason> defaultReasons = <ScoreReason>[
       ScoreReason(label: 'Correct answer', delta: 10),
