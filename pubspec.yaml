@@ -39,6 +39,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   objectbox: ^5.3.1
   objectbox_flutter_libs: any
+  flutter_launcher_icons: ^0.14.4
 
 dev_dependencies:
   flutter_test:
@@ -97,3 +98,16 @@ flutter:
   
   # for localization support, specify the path to the ARB files
   generate: true
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "images/icon.png"
+  min_sdk_android: 21 # android min sdk min:16, default 21
+  windows:
+    generate: true
+    image_path: "images/icon.png"
+    icon_size: 48 # min:48, max:256, default: 48
+  macos:
+    generate: true
+    image_path: "images/icon.png"
