@@ -37,6 +37,7 @@ class _ChangeReasonDialogState extends State<ChangeReasonDialog> {
     }
     _customReasonController.addListener(_isAllFieldsNotEmpty);
     _customScoreController.addListener(_isAllFieldsNotEmpty);
+    _isAllFieldsNotEmpty();
   }
 
   void _isAllFieldsNotEmpty() {
@@ -197,8 +198,6 @@ class _ChangeReasonDialogState extends State<ChangeReasonDialog> {
   }
 
   bool checkValidForm() {
-    return !_fieldEmpty &&
-        _formKey.currentState != null &&
-        _formKey.currentState!.validate();
+    return !_fieldEmpty;
   }
 }
