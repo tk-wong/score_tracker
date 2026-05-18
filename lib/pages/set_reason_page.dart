@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:score_app/controller/score_reason_controller.dart';
 import 'package:score_app/main.dart';
 import 'package:score_app/models/score_reason.dart';
-import 'package:score_app/widgets/change_reason_dialog.dart';
+import 'package:score_app/widgets/default_reason_setting/change_reason_dialog.dart';
+import 'package:score_app/widgets/default_reason_setting/delete_reason_dialog.dart';
 
 class SetReasonPage extends StatefulWidget {
   const SetReasonPage({super.key});
@@ -12,89 +13,106 @@ class SetReasonPage extends StatefulWidget {
 }
 
 class _SetReasonPageState extends State<SetReasonPage> {
-late final ScoreReasonController _reasonController;
-@override
-void initState() {
-  super.initState();
-  _reasonController = ScoreReasonController.create(objectBox.store);
-}
+  late final ScoreReasonController _reasonController;
+  @override
+  void initState() {
+    super.initState();
+    _reasonController = ScoreReasonController.create(objectBox.store);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Set Default Reasons'),
-      ),
+      appBar: AppBar(title: Text('Set Default Reasons')),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           await _handleScoreReason(context: context);
         },
         child: const Icon(Icons.add),
       ),
-      body: StreamBuilder(stream: _reasonController.getAllReasons(), builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          final reasons = snapshot.data!;
-          return ListView.builder(
-            itemCount: reasons.length,
-            itemBuilder: (context, index) {
-              final reason = reasons[index];
-              return ListTile(
-                title: Text(reason.label),
-                // subtitle: Text(reason.delta.toString()),
-                subtitle: Text("score: ${reason.delta.toString()}", style: TextStyle(
-                  fontSize: 16,
-                  color: reason.delta >= 0 ? Colors.green : Colors.red,
-                ),),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.edit),
-                      onPressed: () async {
-                        await _handleScoreReason(context: context, reason: reason);
-                      },
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.delete),
-                      onPressed: () async {
-                        final confirmDelete = await showDialog(context: context, builder: (BuildContext context){
-                          return AlertDialog(
-                            title: Text('Delete reason'),
-                            content: Text('Are you sure you want to delete ${reason.label} with score ${reason.delta}?'),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.of(context).pop(false),
-                                child: Text('Cancel'),
-                              ),
-                              TextButton(
-                                onPressed: () => Navigator.of(context).pop(true),
-                                child: Text('Delete'),
-                              ),
-                            ],
-                          );
-                        },
-                        );
-                          if(confirmDelete == true) {
-                            _reasonController.deleteReason(reason.id);
-                          }
-                        },
-                    ),
-                  ],
-                ),
-              );
-            },
-          );
-        } else {
-          return Center(child: CircularProgressIndicator());
-        }
-      })
+      body: StreamBuilder(
+        stream: _reasonController.getAllReasons(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return _formatDefaultReason(snapshot);
+          } else {
+            return Center(child: CircularProgressIndicator());
+          }
+        },
+      ),
     );
   }
 
-  Future<void> _handleScoreReason({required BuildContext context, ScoreReason? reason}) async {
-    final scoreReason = await showDialog(context: context, builder: (BuildContext context){
-      return ChangeReasonDialog(reason: reason);
-    },
+  ListView _formatDefaultReason(AsyncSnapshot<List<ScoreReason>> snapshot) {
+    final reasons = snapshot.data!;
+    return ListView.builder(
+      itemCount: reasons.length,
+      itemBuilder: (context, index) {
+        final reason = reasons[index];
+        bool isPositive = reason.delta >= 0;
+        final deltaString = isPositive
+            ? '+${reason.delta}'
+            : reason.delta.toString();
+        return ListTile(
+          title: Text(reason.label),
+          // subtitle: Text(reason.delta.toString()),
+          subtitle: Text(
+            "score: $deltaString",
+            style: TextStyle(
+              fontSize: 16,
+              color: isPositive ? Colors.green : Colors.red,
+            ),
+          ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: Icon(Icons.edit),
+                onPressed: () async {
+                  await _handleScoreReason(
+                    context: context,
+                    reason: reason,
+                  );
+                },
+              ),
+              IconButton(
+                icon: Icon(Icons.delete),
+                onPressed: () async {
+                  await _onDeleteReason(context, reason, deltaString);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _onDeleteReason(
+    BuildContext context,
+    ScoreReason reason,
+    String deltaString,
+  ) async {
+    final confirmDelete = await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return DeleteReasonDialog(reason: reason, deltaString: deltaString);
+      },
+    );
+    if (confirmDelete == true) {
+      _reasonController.deleteReason(reason.id);
+    }
+  }
+
+  Future<void> _handleScoreReason({
+    required BuildContext context,
+    ScoreReason? reason,
+  }) async {
+    final scoreReason = await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return ChangeReasonDialog(reason: reason);
+      },
     );
     if (scoreReason != null) {
       _reasonController.addOrUpdateReason(scoreReason);
