@@ -1,27 +1,14 @@
 # score_app
 
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+A score app that can mark the reason for score changes, manage the default reasons, and record score history.
 
 ## install step
-1. install dependencies
+1. ensure you have Flutter installed. If not, follow the instructions on the official Flutter website: https://flutter.dev/docs/get-started/install
+2. install dependencies (objectbox, cupertino_icons)
 ```bash
 flutter pub get
 ```
-2. run app
+3. run app
 ```bash
 flutter run
 ```
