@@ -41,3 +41,9 @@ All screenshots are taken on ubuntu desktop
 ![score history](readme_image/image-2.png)
 4. default reason setting page: shows the list of default reasons and allows user to add, edit, delete default reasons
 ![set default reason](readme_image/image-3.png)
+
+## Future improvements
+- [ ] CI/CD with [codemagic](https://blog.codemagic.io/getting-started-with-codemagic/)
+- [ ] dark mode
+- [ ] chart to compare score between users
+- [ ] export score history to csv or excel
