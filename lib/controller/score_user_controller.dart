@@ -12,6 +12,7 @@ class ScoreUserController {
   Stream<List<ScoreUser>> getAllUsers() {
     final userStream = _scoreUserBox
         .query()
+        .order(ScoreUser_.score, flags: Order.descending)
         .watch(triggerImmediately: true)
         .map((q) => q.find())
         ;

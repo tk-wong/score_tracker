@@ -45,5 +45,6 @@ All screenshots are taken on ubuntu desktop
 ## Future improvements
 - [ ] CI/CD with [codemagic](https://blog.codemagic.io/getting-started-with-codemagic/)
 - [ ] dark mode
+- [x] sort user by score
 - [ ] chart to compare score between users
 - [ ] export score history to csv or excel

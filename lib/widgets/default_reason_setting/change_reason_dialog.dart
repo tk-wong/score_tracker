@@ -25,6 +25,7 @@ class _ChangeReasonDialogState extends State<ChangeReasonDialog> {
   };
   bool _fieldEmpty = true;
   final _formKey = GlobalKey<FormState>();
+  
   @override
   void initState() {
     super.initState();

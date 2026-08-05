@@ -12,7 +12,8 @@ void main() async {
   objectBox = await ObjectBox.create();
   Store store = objectBox.store; // Access the store if needed for setup
   ScoreReasonController reasonController = ScoreReasonController.create(store);
-  reasonController.loadDefaultReasons(); // Load default reasons into the database
+  reasonController
+      .loadDefaultReasons(); // Load default reasons into the database
   ScoreUserController userController = ScoreUserController.create(store);
   userController.addDefaultUsers(); // Load default users into the database
   runApp(const ScoreApp());
@@ -29,11 +30,23 @@ class ScoreApp extends StatelessWidget {
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
+        brightness: Brightness.light,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.teal,
+          brightness: Brightness.light,
+        ),
         useMaterial3: true,
       ),
+      darkTheme: ThemeData(
+        brightness: Brightness.dark,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.teal,
+          brightness: Brightness.dark,
+        ),
+        useMaterial3: true,
+      ),
+      themeMode: ThemeMode.dark,
       home: const ScoreHomePage(),
-      
     );
   }
 }
