@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:objectbox/objectbox.dart';
 import 'package:score_app/controller/score_reason_controller.dart';
 import 'package:score_app/controller/score_user_controller.dart';
+import 'package:score_app/controller/theme_mode_controller.dart';
 import 'package:score_app/models/object_box.dart';
 import 'l10n/app_localizations.dart';
 import 'pages/score_home_page.dart';
@@ -16,11 +17,30 @@ void main() async {
       .loadDefaultReasons(); // Load default reasons into the database
   ScoreUserController userController = ScoreUserController.create(store);
   userController.addDefaultUsers(); // Load default users into the database
-  runApp(const ScoreApp());
+
+  ThemeMode themeMode = await ThemeModeController.getThemeMode();
+  runApp(ScoreApp(themeMode: themeMode));
 }
 
-class ScoreApp extends StatelessWidget {
-  const ScoreApp({super.key});
+class ScoreApp extends StatefulWidget {
+  final ThemeMode themeMode;
+  const ScoreApp({super.key, required this.themeMode});
+
+  @override
+  State<ScoreApp> createState() => ScoreAppState();
+
+  static ScoreAppState of(BuildContext context) =>
+      context.findAncestorStateOfType<ScoreAppState>()!;
+}
+
+class ScoreAppState extends State<ScoreApp> {
+  late ThemeMode _themeMode;
+
+  @override
+  void initState() {
+    super.initState();
+    _themeMode = widget.themeMode;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,8 +65,17 @@ class ScoreApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      themeMode: ThemeMode.dark,
+      themeMode: _themeMode,
       home: const ScoreHomePage(),
     );
   }
+
+  void changeTheme(ThemeMode newTheme) {
+    setState(() {
+      _themeMode = newTheme;
+    });
+    ThemeModeController.setThemeMode(newTheme);
+  }
+
+  ThemeMode get themeMode => _themeMode;
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:score_app/main.dart';
 import 'package:score_app/pages/set_reason_page.dart';
 
 enum ColorTheme { light, dark, system }
@@ -52,8 +53,15 @@ class ColorThemeSelectionDialog extends StatefulWidget {
 }
 
 class _ColorThemeSelectionDialogState extends State<ColorThemeSelectionDialog> {
-  ThemeMode _selectedColorTheme = ThemeMode.light;
   final _colorThemeFormKey = GlobalKey<FormState>();
+  late ThemeMode selectedColorTheme;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedColorTheme = ScoreApp.of(context).themeMode;
+  }
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -61,9 +69,9 @@ class _ColorThemeSelectionDialogState extends State<ColorThemeSelectionDialog> {
       content: Form(
         key: _colorThemeFormKey,
         child: RadioGroup(
-          groupValue: _selectedColorTheme,
+          groupValue: selectedColorTheme,
           onChanged: (ThemeMode? value) => {
-            setState(() => _selectedColorTheme = value!),
+            setState(() => selectedColorTheme = value!),
           },
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -91,13 +99,17 @@ class _ColorThemeSelectionDialogState extends State<ColorThemeSelectionDialog> {
           child: const Text('Cancel'),
         ),
         FilledButton(
-          onPressed: _onChangeTheme, //todo: add onPress function
+          onPressed: () =>
+              _onChangeTheme(selectedColorTheme), //todo: add onPress function
           child: const Text('Confirm'),
         ),
       ],
     );
   }
-  void _onChangeTheme() {
- // https://stackoverflow.com/a/67714404 
+
+  void _onChangeTheme(ThemeMode newTheme) {
+    ScoreApp.of(context).changeTheme(newTheme);
+    Navigator.of(context).pop();
   }
 }
+

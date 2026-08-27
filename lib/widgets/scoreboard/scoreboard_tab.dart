@@ -24,6 +24,7 @@ class ScoreboardTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+       final currentTheme = Theme.of(context).brightness;
     return Column(
       children: <Widget>[
         ScoreboardTitle(
@@ -35,6 +36,8 @@ class ScoreboardTab extends StatelessWidget {
           child: users.isEmpty
               ? const Center(child: Text('No users added yet.'))
               : ScoreboardList(
+                // ensure the text can change color
+                key: ValueKey(currentTheme),
                   users: users,
                   onAddScore: onAddScore,
                   onSubtractScore: onSubtractScore,

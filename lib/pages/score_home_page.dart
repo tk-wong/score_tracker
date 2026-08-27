@@ -277,6 +277,9 @@ class _ScoreHomePageState extends State<ScoreHomePage>
                 context,
                 MaterialPageRoute(builder: (context) => SettingPage()),
               ),
+                if (mounted) 
+                {setState(() {})}
+  
         }, icon: Icon(Icons.settings))],
       ),
       body: TabBarView(

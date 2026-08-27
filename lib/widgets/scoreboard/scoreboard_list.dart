@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:score_app/main.dart';
 import 'package:score_app/models/score_user.dart';
 
 class ScoreboardList extends StatefulWidget {
@@ -22,15 +23,20 @@ class ScoreboardList extends StatefulWidget {
 class _ScoreboardListState extends State<ScoreboardList> {
   @override
   Widget build(BuildContext context) {
+    final currentTheme = Theme.of(context).brightness;
     return ListView.separated(
+      key: ValueKey(currentTheme),
       itemCount: widget.users.length,
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       separatorBuilder: (BuildContext context, int index) =>
           const SizedBox(height: 12),
-      itemBuilder: (BuildContext context, int index) {
+      itemBuilder: (BuildContext listContext, int index) {
         final ScoreUser user = widget.users[index];
         final List<Widget> userDisplayList = <Widget>[
-          CircleAvatar(child: Text(user.name.characters.first)),
+          CircleAvatar(
+
+            child: Text(user.name.characters.first)
+            ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -108,3 +114,5 @@ class _ScoreboardListState extends State<ScoreboardList> {
     );
   }
 }
+
+// TODO: fix the color after changing the theme
