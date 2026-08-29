@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:score_app/main.dart';
 import 'package:score_app/models/score_user.dart';
+import 'package:score_app/widgets/scoreboard/custom_circle_avatar.dart';
 
 class ScoreboardList extends StatefulWidget {
   const ScoreboardList({
@@ -23,9 +24,7 @@ class ScoreboardList extends StatefulWidget {
 class _ScoreboardListState extends State<ScoreboardList> {
   @override
   Widget build(BuildContext context) {
-    final currentTheme = Theme.of(context).brightness;
     return ListView.separated(
-      key: ValueKey(currentTheme),
       itemCount: widget.users.length,
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       separatorBuilder: (BuildContext context, int index) =>
@@ -33,17 +32,18 @@ class _ScoreboardListState extends State<ScoreboardList> {
       itemBuilder: (BuildContext listContext, int index) {
         final ScoreUser user = widget.users[index];
         final List<Widget> userDisplayList = <Widget>[
-          CircleAvatar(
-
-            child: Text(user.name.characters.first)
-            ),
+          CustomCircleAvatar(name: user.name),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
+              key: ValueKey(ScoreApp.of(context).themeMode),
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(user.name, style: Theme.of(context).textTheme.titleMedium),
-                Text('Score: ${user.score}'),
+                Text(
+                  'Score: ${user.score}',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
               ],
             ),
           ),
@@ -114,5 +114,3 @@ class _ScoreboardListState extends State<ScoreboardList> {
     );
   }
 }
-
-// TODO: fix the color after changing the theme

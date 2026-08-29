@@ -44,6 +44,10 @@ class ScoreAppState extends State<ScoreApp> {
 
   @override
   Widget build(BuildContext context) {
+    // ensure changing theme mode works and not flicker
+    // e.g. one second of the color in other theme
+    const buttonStyle = ButtonStyle(animationDuration: Duration.zero);
+
     return MaterialApp(
       title: 'Team Score Tracker',
       debugShowCheckedModeBanner: false,
@@ -56,6 +60,9 @@ class ScoreAppState extends State<ScoreApp> {
           brightness: Brightness.light,
         ),
         useMaterial3: true,
+        
+        filledButtonTheme: FilledButtonThemeData(style: buttonStyle),
+        iconButtonTheme: IconButtonThemeData(style: buttonStyle),
       ),
       darkTheme: ThemeData(
         brightness: Brightness.dark,
@@ -64,9 +71,12 @@ class ScoreAppState extends State<ScoreApp> {
           brightness: Brightness.dark,
         ),
         useMaterial3: true,
+
+        filledButtonTheme: FilledButtonThemeData(style: buttonStyle),
+        iconButtonTheme: IconButtonThemeData(style: buttonStyle),
       ),
       themeMode: _themeMode,
-      home: const ScoreHomePage(),
+      home: ScoreHomePage(key: ValueKey(_themeMode)),
     );
   }
 
